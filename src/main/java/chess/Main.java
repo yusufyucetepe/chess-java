@@ -1,3 +1,5 @@
+package chess;
+
 import javax.swing.*;
 
 public class Main {

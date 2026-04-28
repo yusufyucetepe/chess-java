@@ -1,3 +1,4 @@
+package chess;
 public class ChessPiece {
     private PieceType type;
     private boolean isWhite;
