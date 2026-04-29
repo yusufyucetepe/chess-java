@@ -4,7 +4,7 @@ import javax.swing.JFrame;
 
 public class Game extends JFrame {
     public Game() {
-        super("Chess Game");
+        super("Chess");
         ChessBoard chessBoard = new ChessBoard();
         BoardPanel boardPanel = new BoardPanel(chessBoard);
         add(boardPanel);

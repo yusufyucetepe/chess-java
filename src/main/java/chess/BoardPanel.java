@@ -13,11 +13,11 @@ import com.github.bhlangonijr.chesslib.Square;
 
 public class BoardPanel extends JPanel {
     private static final int SQUARE_SIZE = 80;
-    private static final Color LIGHT_SQUARE = new Color(238, 238, 210);
-    private static final Color DARK_SQUARE = new Color(118, 150, 86);
+    private static final Color LIGHT_SQUARE = new Color(230, 210, 181);
+    private static final Color DARK_SQUARE = new Color(128, 100, 63);
     private static final Color SELECTED_COLOR = new Color(186, 202, 68, 128);
-    private static final Color VALID_MOVE_COLOR = new Color(130, 151, 105);
-    private static final Color STATUS_BG = new Color(220, 20, 20);
+    private static final Color VALID_MOVE_COLOR = new Color(144, 131, 112);
+    private static final Color STATUS_BG = new Color(255, 77, 6);
     
     private ChessBoard chessBoard;
     private Map<Piece, BufferedImage> pieceImages;
