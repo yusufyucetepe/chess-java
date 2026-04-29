@@ -3,6 +3,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.util.HashMap;
+import java.util.Map;
+import javax.imageio.ImageIO;
+import java.io.File;
 import com.github.bhlangonijr.chesslib.Piece;
 import com.github.bhlangonijr.chesslib.Square;
 
@@ -15,15 +20,13 @@ public class BoardPanel extends JPanel {
     private static final Color STATUS_BG = new Color(220, 20, 20);
     
     private ChessBoard chessBoard;
-    
-    // Piece symbols mapping
-    private static final String[][] PIECE_SYMBOLS = {
-        {"♔", "♕", "♖", "♗", "♘", "♙"},  // White pieces
-        {"♚", "♛", "♜", "♝", "♞", "♟"}   // Black pieces
-    };
+    private Map<Piece, BufferedImage> pieceImages;
     
     public BoardPanel(ChessBoard chessBoard) {
         this.chessBoard = chessBoard;
+        this.pieceImages = new HashMap<>();
+        loadPieceImages();
+        
         setPreferredSize(new Dimension(SQUARE_SIZE * 8, SQUARE_SIZE * 8 + 30));
         
         addMouseListener(new MouseAdapter() {
@@ -39,12 +42,58 @@ public class BoardPanel extends JPanel {
         });
     }
     
+    private void loadPieceImages() {
+        // Array of pieces to load
+        Piece[] piecesToLoad = {
+            Piece.WHITE_KING, Piece.WHITE_QUEEN, Piece.WHITE_ROOK,
+            Piece.WHITE_BISHOP, Piece.WHITE_KNIGHT, Piece.WHITE_PAWN,
+            Piece.BLACK_KING, Piece.BLACK_QUEEN, Piece.BLACK_ROOK,
+            Piece.BLACK_BISHOP, Piece.BLACK_KNIGHT, Piece.BLACK_PAWN
+        };
+        
+        for (Piece piece : piecesToLoad) {
+            String filename = getImageFilename(piece);
+            String path = "assets/" + filename;
+            
+            try {
+                BufferedImage originalImage = ImageIO.read(new File(path));
+                // Scale image to fit within square (leave small margin)
+                int imageSize = SQUARE_SIZE - 10; // 70x70 in an 80x80 square
+                Image scaledImage = originalImage.getScaledInstance(
+                    imageSize, imageSize, Image.SCALE_SMOOTH
+                );
+                
+                // Convert back to BufferedImage for better performance
+                BufferedImage bufferedScaled = new BufferedImage(
+                    imageSize, imageSize, BufferedImage.TYPE_INT_ARGB
+                );
+                Graphics2D g2d = bufferedScaled.createGraphics();
+                g2d.drawImage(scaledImage, 0, 0, null);
+                g2d.dispose();
+                
+                pieceImages.put(piece, bufferedScaled);
+                
+            } catch (Exception e) {
+                System.err.println("Error loading image: " + path);
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    private String getImageFilename(Piece piece) {
+        String color = piece.getPieceSide().name().toLowerCase(); // "white" or "black"
+        String type = piece.getPieceType().name().toLowerCase();  // "king", "queen", etc.
+        return color + "_" + type + ".png";
+    }
+    
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
                             RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                            RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         
         drawBoard(g2d);
         drawHighlights(g2d);
@@ -85,25 +134,22 @@ public class BoardPanel extends JPanel {
     }
     
     private void drawPieces(Graphics2D g) {
-        Font font = new Font("Sans-Serif", Font.PLAIN, 60);
-        g.setFont(font);
-        
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
                 Square square = getSquareFromCoords(row, col);
                 Piece piece = chessBoard.getBoard().getPiece(square);
                 
                 if (piece != Piece.NONE) {
-                    String symbol = getPieceSymbol(piece);
-                    Color color = piece.getPieceSide().name().equals("WHITE") 
-                                 ? Color.WHITE : Color.BLACK;
-                    
-                    g.setColor(color);
-                    FontMetrics fm = g.getFontMetrics();
-                    int x = col * SQUARE_SIZE + (SQUARE_SIZE - fm.stringWidth(symbol)) / 2;
-                    int y = row * SQUARE_SIZE + (SQUARE_SIZE + fm.getAscent()) / 2 - 5;
-                    
-                    g.drawString(symbol, x, y);
+                    BufferedImage image = pieceImages.get(piece);
+                    if (image != null) {
+                        // Center the image in the square
+                        int imageSize = image.getWidth();
+                        int offset = (SQUARE_SIZE - imageSize) / 2;
+                        int x = col * SQUARE_SIZE + offset;
+                        int y = row * SQUARE_SIZE + offset;
+                        
+                        g.drawImage(image, x, y, null);
+                    }
                 }
             }
         }
@@ -121,20 +167,6 @@ public class BoardPanel extends JPanel {
             FontMetrics fm = g.getFontMetrics();
             int x = (SQUARE_SIZE * 8 - fm.stringWidth(status)) / 2;
             g.drawString(status, x, 20);
-        }
-    }
-    
-    private String getPieceSymbol(Piece piece) {
-        int colorIndex = piece.getPieceSide().name().equals("WHITE") ? 0 : 1;
-        
-        switch (piece.getPieceType()) {
-            case KING: return PIECE_SYMBOLS[colorIndex][0];
-            case QUEEN: return PIECE_SYMBOLS[colorIndex][1];
-            case ROOK: return PIECE_SYMBOLS[colorIndex][2];
-            case BISHOP: return PIECE_SYMBOLS[colorIndex][3];
-            case KNIGHT: return PIECE_SYMBOLS[colorIndex][4];
-            case PAWN: return PIECE_SYMBOLS[colorIndex][5];
-            default: return "";
         }
     }
     
