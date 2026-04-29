@@ -5,8 +5,13 @@ import javax.swing.JFrame;
 public class Game extends JFrame {
     public Game() {
         super("Chess Game");
+        ChessBoard chessBoard = new ChessBoard();
+        BoardPanel boardPanel = new BoardPanel(chessBoard);
+        add(boardPanel);
+
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(900, 700);
+        pack();
+        setResizable(false);
         setLocationRelativeTo(null);
     }
 }

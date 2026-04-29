@@ -38,14 +38,10 @@ public class ChessBoard {
             }
         } else {
             // Second click - try to move
-            Move move = new Move(selectedSquare, clickedSquare);
-            
             // Check if this is a valid move (including promotion)
-            boolean moveExecuted = false;
             for (Move legalMove : board.legalMoves()) {
                 if (legalMove.getFrom() == selectedSquare && legalMove.getTo() == clickedSquare) {
                     board.doMove(legalMove);
-                    moveExecuted = true;
                     break;
                 }
             }
