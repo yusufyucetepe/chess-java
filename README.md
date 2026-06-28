@@ -1,4 +1,4 @@
-# ♟️ Java Chess Game
+# Java Chess Game
 
 A fully functional chess game built with Java Swing, featuring a graphical user interface with smooth piece movement, valid move highlighting, and complete chess rule implementation.
 
